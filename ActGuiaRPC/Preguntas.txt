@@ -1,0 +1,34 @@
+1. ¿Qué pasó con el servicio UDP de CUANTOS?
+En la versión original con sockets, tenías dos protocolos separados: TCP para asignar 
+el turno (orientado a conexión) y UDP para consultar cuántos turnos iban asignados 
+(datagramas rápidos sin conexión).
+Qué se ganó y qué se perdió respecto a la versión con sockets?
+Lo que se GANÓ:
+Abstracción y simplicidad: Desaparece todo el manejo de bajo nivel: bind, accept, recv, sendall, 
+buffers, framing con \n y codificación utf-8.
+
+Semántica de llamadas a funciones: En lugar de diseñar e interpretar una sintaxis manual ("TURNO>ana" o 
+"error>formato..."), 
+llamas a métodos nativos (cliente.tomar_turno("ana"))
+que devuelven tipos de datos nativos de python
+Lo que se perdio:
+Overhead de red e hiperfrecuencia: XML-RPC envía encabezados HTTP completos y estructuras XML 
+verbosas por cada petición (<methodCall><params>...). En la versión original, un mensaje UDP 
+era de apenas unos bytes.
+
+Velocidad y baja latencia de UDP: La consulta CUANTOS antes era un simple datagrama de 
+"disparar y olvidar" (sin handshake ni garantía de entrega). Ahora requiere abrir o reutilizar 
+una conexión TCP y realizar el ciclo completo de petición/respuesta HTTP.
+
+
+¿Qué excepción llega si el cliente llama a una función que no existe y dónde se generó?
+Si desde el cliente ejecutas una función inexistente, por ejemplo:
+Python
+cliente.funcion_inexistente()
+Texto plano
+xmlrpc.client.Fault: <Fault 1: 'method "funcion_inexistente" is not supported'>
+El cliente envía la petición HTTP POST codificada en XML pidiendo ejecutar 
+funcion_inexistente. El servidor XML-RPC recibe la petición, busca el nombre 
+en su tabla de funciones registradas (register_function) y, al no encontrarla, 
+el servidor atrapa el error y genera un objeto Fault con el código de error 1 y 
+el mensaje 'method "funcion_inexistente" is not supported'.
