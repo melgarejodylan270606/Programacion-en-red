@@ -1,0 +1,16 @@
+[
+  {
+    "id": 1,
+    "tipo": "incidente",
+    "descripcion": "Servidor comprometido totalmente",
+    "estado": "resuelta",
+    "hora": "2026-11-06 14:21:22"
+  },
+  {
+    "id": 3,
+    "tipo": "incidente",
+    "descripcion": "Phishing reportado por un usuario",
+    "estado": "abierta",
+    "hora": "2026-11-06 14:21:22"
+  }
+]
